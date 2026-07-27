@@ -1,12 +1,12 @@
-python-dotenv
 streamlit
-sentence-transformers
+python-dotenv
 langchain
 langchain-community
 langchain-huggingface
 langchain-text-splitters
 langchain-chroma
 langchain-groq
-unstructured
-unstructured[pdf]
-langchain-unstructured
+chromadb
+pypdf
+sentence-transformers
+huggingface-hub
