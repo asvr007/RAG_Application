@@ -1,0 +1,11 @@
+#python 
+__pycache__
+
+#Virtual Environment
+ragst/ 
+
+#Environment variables
+.env 
+
+#Chroma vector store 
+doc_vectorstore 
