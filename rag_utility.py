@@ -1,5 +1,5 @@
 #Functions related to RAG
-
+import streamlit as st
 import os
 from dotenv import load_dotenv
 
@@ -17,7 +17,13 @@ from huggingface_hub import login
 load_dotenv()
 APIKEY = os.getenv("GROK_API_KEY")
 
+if not APIKEY:
+    APIKEY = st.secrets["GROQ_API_KEY"]
+    
 HF_TOKEN = os.getenv("HF_TOKEN")
+if not HF_TOKEN:
+    HF_TOKEN = st.secrets["HF_TOKEN"]
+    
 login(token=HF_TOKEN)
 working_dir = os.path.dirname(os.path.abspath(__file__))
 
