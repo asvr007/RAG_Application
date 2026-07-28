@@ -41,7 +41,7 @@ def process_doc_to_chromadb(file_path):
     documents = loader.load()
 
     #Split the text into chunks for embedidngs
-    splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap = 200)
+    splitter = RecursiveCharacterTextSplitter(chunk_size = 1500, chunk_overlap = 300)
     chunks = splitter.split_documents(documents)
 
     vectordb = Chroma.from_documents(documents=chunks, embedding = embedding)
@@ -51,7 +51,8 @@ def process_doc_to_chromadb(file_path):
 def answer_the_question(user_question, vectordb):
 
     #Create a retriever for document_search
-    retriever = vectordb.as_retriever(search_kwargs={"k":4})
+    retriever = vectordb.as_retriever(search_type="mmr, 
+        search_kwargs={"k":10, "fetch_k" : 25, "lambda_mult" : 0.5})
 
     #Create a RetrievalQA chain to answer user questions using Llama-3.3-70b-versatile
     qa_chain = RetrievalQA.from_chain_type(llm = llm, chain_type = "stuff", retriever = retriever)
