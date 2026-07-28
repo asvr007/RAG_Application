@@ -51,6 +51,6 @@ if st.button("Answer"):
             try:
                 answer = answer_the_question(user_question, st.session_state.vectordb)
                 st.markdown("## Llama-3.3-70B Response")
-                st.write("answer")
+                st.write(answer)
             except Exception as e:
                 st.error(f"Error while generating answer:\n\n{e}")
