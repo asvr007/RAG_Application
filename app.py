@@ -27,6 +27,8 @@ if uploaded_file is not None:
         try:
             vectordb = process_doc_to_chromadb(temp_pdf_path)
             st.session_state.processed_file = uploaded_file.name
+            if st.session_state.vectordb is None:
+                st.session_state.vectordb = vectordb
             st.success("Document processed succesfully")
         except Exception as e:
             st.error(f"Error while processing document: \n\n{e}")
