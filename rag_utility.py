@@ -4,14 +4,12 @@ import os
 import shutil
 from dotenv import load_dotenv
 
-# from langchain_community.document_loaders import UnstructuredPDFLoader
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_groq import ChatGroq
 from langchain_classic.chains import RetrievalQA
-# from sentence_transformers import SentenceTransformer
 from huggingface_hub import login
 
 #load env variables from .env file
@@ -26,13 +24,10 @@ if not HF_TOKEN:
     HF_TOKEN = st.secrets["HF_TOKEN"]
     
 login(token=HF_TOKEN)
-# working_dir = os.path.dirname(os.path.abspath(__file__))
-# persist_directory = os.path.join(working_dir, "doc_vectorstore")
 
 @st.cache_resource
 def load_embedding_model():    
 #Load the embeding model
-# embedding = SentenceTransformer('sentence-transformers/all-miniLM-L12-v2')
     return HuggingFaceEmbeddings(model_name = "sentence-transformers/all-MiniLM-L12-v2")
     
 embedding = load_embedding_model()
@@ -49,7 +44,7 @@ def process_doc_to_chromadb(file_path):
     splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap = 200)
     chunks = splitter.split_documents(documents)
 
-    vectordb = Chroma.from_documents(documents=chunks, embedding = embedding,)
+    vectordb = Chroma.from_documents(documents=chunks, embedding = embedding)
     return vectordb
 
 
