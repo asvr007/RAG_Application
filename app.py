@@ -11,8 +11,10 @@ st.title("Llama -3.3-70B Versatile - Document RAG")
 
 #Session_State
 if "vectordb" not in st.session_state:
-    st.session_state.vetordb = None
-
+    st.session_state.vectordb = None
+if "processed_file" not in st.session_state:
+    st.session_state.processed_file = None
+    
 #File Uploader
 uploaded_file = st.file_uploader("Upload a PDF file ", type=["pdf"])
 
@@ -26,9 +28,9 @@ if uploaded_file is not None:
     with st.spinner("Processing the document "):
         try:
             vectordb = process_doc_to_chromadb(temp_pdf_path)
+            
             st.session_state.processed_file = uploaded_file.name
-            if st.session_state.vectordb is None:
-                st.session_state.vectordb = vectordb
+            st.session_state.vectordb = vectordb
             st.success("Document processed succesfully")
         except Exception as e:
             st.error(f"Error while processing document: \n\n{e}")
@@ -38,11 +40,10 @@ if uploaded_file is not None:
 
 #Text widget to get the user question
 user_question = st.text_area("Ask your question  about the document")
-st.session_state.vectordb = process_doc_to_chromadb(temp_pdf_path)
 
 if st.button("Answer"):
-    if uploaded_file is None:
-        st.warning("Please upload a PDF Document first")
+    if st.session_state.vectordb is None:
+        st.warning("Please upload a PDF Document and process it first")
     elif not user_question.strip():
         st.warning("Please enter a question")
     else:
@@ -50,6 +51,6 @@ if st.button("Answer"):
             try:
                 answer = answer_the_question(user_question, st.session_state.vectordb)
                 st.markdown("## Llama-3.3-70B Response")
-                st.markdown("answer")
+                st.write("answer")
             except Exception as e:
                 st.error(f"Error while generating answer:\n\n{e}")
