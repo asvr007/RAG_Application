@@ -45,7 +45,7 @@ if st.button("Answer"):
     else:
         with st.spinner("Generating answer..."):
             try:
-                answer = answer_the_question(user_question)
+                answer = answer_the_question(user_question, st.session_state.vectordb)
                 st.markdown("## Llama-3.3-70B Response")
                 st.markdown("answer")
             except Exception as e:
