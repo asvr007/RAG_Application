@@ -36,6 +36,7 @@ if uploaded_file is not None:
 
 #Text widget to get the user question
 user_question = st.text_area("Ask your question  about the document")
+st.session_state.vectordb = process_doc_to_chromadb(temp_pdf_path)
 
 if st.button("Answer"):
     if uploaded_file is None:
