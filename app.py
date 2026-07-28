@@ -9,15 +9,15 @@ working_dir = os.path.dirname(os.path.abspath(__file__))
 
 st.title("Llama -3.3-70B Versatile - Document RAG")
 
+#Session_State
+if "vectordb" not in st.session_state:
+    st.session_state.vetordb = None
+
 #File Uploader
 uploaded_file = st.file_uploader("Upload a PDF file ", type=["pdf"])
 
 if uploaded_file is not None:
-    # #define save_path
-    # save_path = os.path.join(working_dir, uploaded_file.name)
-    # #Save the file
-    # with open(save_path, "wb") as f:
-    #     f.write(uploaded_file.getbuffer())
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
         tmp_file.write(uploaded_file.getbuffer())
         temp_pdf_path = tmp_file.name
@@ -25,11 +25,14 @@ if uploaded_file is not None:
     # process_document = process_doc_to_chromadb(save_path)
     with st.spinner("Processing the document "):
         try:
-            process_doc_to_chromadb(temp_pdf_path)
+            vectordb = process_doc_to_chromadb(temp_pdf_path)
             st.session_state.processed_file = uploaded_file.name
             st.success("Document processed succesfully")
         except Exception as e:
             st.error(f"Error while processing document: \n\n{e}")
+        finally:
+            if os.path.exists(temp_pdf_path):
+                os.remove(temp_pdf_path)
 
 #Text widget to get the user question
 user_question = st.text_area("Ask your question  about the document")
