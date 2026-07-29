@@ -1,7 +1,7 @@
-#Functions related to RAG
-import streamlit as st
 import os
-import shutil
+import uuid
+import tempfile
+import streamlit as st
 from dotenv import load_dotenv
 
 from langchain_community.document_loaders import PyPDFLoader
@@ -12,50 +12,83 @@ from langchain_groq import ChatGroq
 from langchain_classic.chains import RetrievalQA
 from huggingface_hub import login
 
-#load env variables from .env file
+# Load environment variables
 load_dotenv()
-APIKEY = os.getenv("GROK_API_KEY")
 
+APIKEY = os.getenv("GROQ_API_KEY")
 if not APIKEY:
     APIKEY = st.secrets["GROQ_API_KEY"]
-    
+
 HF_TOKEN = os.getenv("HF_TOKEN")
 if not HF_TOKEN:
     HF_TOKEN = st.secrets["HF_TOKEN"]
-    
+
 login(token=HF_TOKEN)
 
-@st.cache_resource
-def load_embedding_model():    
-#Load the embeding model
-    return HuggingFaceEmbeddings(model_name = "sentence-transformers/all-MiniLM-L12-v2")
-    
-embedding = load_embedding_model()
-#Load the Llama-3.3-70B model from Groq
-llm = ChatGroq( model = "llama-3.3-70b-versatile", temperature=0, api_key=APIKEY)
 
-#Process document
+@st.cache_resource
+def load_embedding_model():
+    return HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L12-v2"
+    )
+
+
+embedding = load_embedding_model()
+
+llm = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    temperature=0,
+    api_key=APIKEY
+)
+
+
 def process_doc_to_chromadb(file_path):
-    #load the PDF document using UnstructuredPDFloader
+
     loader = PyPDFLoader(file_path)
     documents = loader.load()
 
-    #Split the text into chunks for embedidngs
-    splitter = RecursiveCharacterTextSplitter(chunk_size = 1500, chunk_overlap = 300)
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1500,
+        chunk_overlap=300
+    )
+
     chunks = splitter.split_documents(documents)
 
-    vectordb = Chroma.from_documents(documents=chunks, embedding = embedding)
-    return vectordb
+    # Create a unique temporary directory
+    temp_db_dir = tempfile.mkdtemp()
+
+    # Create a unique collection name
+    collection_name = str(uuid.uuid4())
+
+    vectordb = Chroma.from_documents(
+        documents=chunks,
+        embedding=embedding,
+        persist_directory=temp_db_dir,
+        collection_name=collection_name
+    )
+
+    return vectordb, temp_db_dir
 
 
 def answer_the_question(user_question, vectordb):
 
-    #Create a retriever for document_search
-    retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k":10, "fetch_k" : 25, "lambda_mult" : 0.5})
+    retriever = vectordb.as_retriever(
+        search_type="mmr",
+        search_kwargs={
+            "k": 10,
+            "fetch_k": 25,
+            "lambda_mult": 0.5
+        }
+    )
 
-    #Create a RetrievalQA chain to answer user questions using Llama-3.3-70b-versatile
-    qa_chain = RetrievalQA.from_chain_type(llm = llm, chain_type = "stuff", retriever = retriever)
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=retriever
+    )
 
-    response = qa_chain.invoke({"query" : user_question})
+    response = qa_chain.invoke(
+        {"query": user_question}
+    )
 
-    return  response["result"]
+    return response["result"]
