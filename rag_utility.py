@@ -36,7 +36,7 @@ def load_embedding_model():
 embedding = load_embedding_model()
 
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model="openai/gpt-oss-20b",
     temperature=0,
     api_key=APIKEY
 )
