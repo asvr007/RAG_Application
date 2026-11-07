@@ -10,7 +10,7 @@ from rag_utility import (
 
 working_dir = os.path.dirname(os.path.abspath(__file__))
 
-st.title("Llama-3.3-70B Versatile - Document RAG")
+st.title("openai/gpt-oss-20b - Document RAG")
 
 # ---------------- Session State ---------------- #
 
